@@ -32,6 +32,12 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
   return (
     <div className="space-y-4">
       <div id="score-report" className="space-y-8 print:space-y-6 bg-white p-6">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-2">5S-AI.Com Analysis</h1>
+          <p className="text-gray-600">{new Date().toLocaleDateString()}</p>
+        </div>
+
         {/* Location Info */}
         <div className="grid grid-cols-3 gap-4">
           <div>

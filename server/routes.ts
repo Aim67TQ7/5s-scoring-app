@@ -4,6 +4,8 @@ import { db } from "../db";
 import { analyses } from "../db/schema";
 import { analyze5SFromImages } from "./services/anthropic";
 import sharp from "sharp";
+import fs from 'fs/promises';
+import path from 'path';
 
 const storage = multer.memoryStorage();
 const upload = multer({ 
@@ -14,6 +16,10 @@ const upload = multer({
   }
 });
 
+// Create Reports directory if it doesn't exist
+const reportsDir = path.join(process.cwd(), 'public', 'reports');
+await fs.mkdir(reportsDir, { recursive: true });
+
 export function registerRoutes(app: Express) {
   app.post('/api/analyze', upload.array('photos', 4), async (req, res) => {
     try {
@@ -21,7 +27,23 @@ export function registerRoutes(app: Express) {
         return res.status(400).json({ error: 'No files uploaded' });
       }
 
-      // Convert images to base64
+      // Save images and get their paths
+      const savedImagePaths = await Promise.all(
+        req.files.map(async (file, index) => {
+          const timestamp = Date.now();
+          const filename = `${timestamp}-${index}.jpg`;
+          const filepath = path.join(reportsDir, filename);
+          
+          // Save optimized image
+          await sharp(file.buffer)
+            .jpeg({ quality: 80 })
+            .toFile(filepath);
+          
+          return `/reports/${filename}`;
+        })
+      );
+
+      // Convert images to base64 for analysis
       const base64Images = await Promise.all(
         req.files.map(async (file) => {
           // Convert to JPEG and optimize
@@ -35,13 +57,17 @@ export function registerRoutes(app: Express) {
       // Analyze images
       const analysis = await analyze5SFromImages(base64Images);
 
-      // Store analysis in database
-      await db.insert(analyses).values({
+      // Store analysis in database with image URLs
+      const result = await db.insert(analyses).values({
         scores: analysis,
-        imageUrls: [], // In a production app, we'd store actual image URLs here
+        imageUrls: savedImagePaths,
       });
 
-      res.json(analysis);
+      // Return analysis with image URLs
+      res.json({
+        ...analysis,
+        imageUrls: savedImagePaths
+      });
     } catch (error) {
       console.error('Analysis failed:', error);
       res.status(500).json({ error: 'Failed to analyze images' });
