@@ -49,6 +49,7 @@
     "embla-carousel-react": "^8.3.0",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
+    "html2pdf.js": "^0.10.2",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.453.0",
     "memorystore": "^1.6.7",
