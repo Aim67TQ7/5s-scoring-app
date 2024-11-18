@@ -35,9 +35,9 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
 
   return (
     <div className="space-y-4">
-      <div id="score-report" className="space-y-8 print:space-y-6 bg-white p-6">
+      <div id="score-report" className="space-y-6 print:space-y-4 bg-white p-6">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h1 className="text-3xl font-bold mb-2">5S-AI.Com Analysis</h1>
           <p className="text-gray-600">{new Date().toLocaleDateString()}</p>
         </div>
@@ -58,7 +58,7 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
           </div>
         </div>
 
-        {/* Images Grid - moved up */}
+        {/* Images Grid */}
         <div className="grid grid-cols-2 gap-4">
           {analysis.imageUrls.map((url, index) => (
             <div key={index} className="aspect-square w-full max-h-[200px]">
@@ -72,26 +72,26 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
         </div>
 
         {/* Overall Score */}
-        <div className="text-center border-t border-b py-4">
-          <h2 className="text-2xl font-bold mb-2">Overall Score</h2>
+        <div className="text-center border-t border-b py-3">
+          <h2 className="text-2xl font-bold mb-1">Overall Score</h2>
           <div className="text-4xl font-bold text-primary">
             {analysis.overallScore.toFixed(1)}%
           </div>
         </div>
 
-        {/* Category Scores - made more compact */}
-        <div className="space-y-4">
+        {/* Category Scores - more compact */}
+        <div className="space-y-2">
           {Object.entries(analysis.scores).map(([key, score]) => (
-            <div key={key} className="border-b pb-2">
-              <h3 className="text-lg font-semibold mb-1 capitalize">
+            <div key={key} className="border-b pb-1">
+              <h3 className="text-md font-semibold mb-0.5 capitalize">
                 {key === 'setInOrder' ? 'Set in Order' : key}
               </h3>
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-md">{score.toFixed(1)}%</span>
+              <div className="flex justify-between items-center mb-0.5">
+                <span className="text-sm">{score.toFixed(1)}%</span>
               </div>
               <Progress
                 value={score}
-                className={`${getScoreColor(score)} h-4`}
+                className={`${getScoreColor(score)} h-3`}
               />
             </div>
           ))}
@@ -99,9 +99,9 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
 
         {/* Suggestions */}
         {analysis.suggestions && (
-          <div className="bg-gray-50 p-4 rounded">
-            <h3 className="font-semibold mb-2">Improvement Suggestions</h3>
-            <div className="space-y-4 text-gray-600">
+          <div className="bg-gray-50 p-3 rounded">
+            <h3 className="font-semibold mb-1">Improvement Suggestions</h3>
+            <div className="space-y-2 text-gray-600 text-sm">
               {analysis.suggestions.split('\n\n').map((suggestion, index) => (
                 <p key={index}>{suggestion}</p>
               ))}
