@@ -35,9 +35,9 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
 
   return (
     <div className="space-y-4">
-      <div id="score-report" className="space-y-6 print:space-y-4 bg-white p-6">
+      <div id="score-report" className="space-y-6 print:space-y-4 bg-white px-6 pb-6 pt-2">
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-4">
           <h1 className="text-3xl font-bold mb-2">5S-AI.Com Analysis</h1>
           <p className="text-gray-600">{new Date().toLocaleDateString()}</p>
         </div>
@@ -79,7 +79,7 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
           </div>
         </div>
 
-        {/* Category Scores - updated layout */}
+        {/* Category Scores */}
         <div className="space-y-2">
           {Object.entries(analysis.scores).map(([key, score]) => (
             <div key={key} className="border-b pb-1">
