@@ -46,10 +46,8 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
       return;
     }
 
-    // Append new files to existing ones
     setPhotos(prevPhotos => [...prevPhotos, ...validFiles]);
     
-    // Create and append new previews
     const newPreviews = await Promise.all(
       validFiles.map(file => URL.createObjectURL(file))
     );
@@ -59,7 +57,6 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
   const removePhoto = (index: number) => {
     setPhotos(prevPhotos => prevPhotos.filter((_, i) => i !== index));
     setPreviews(prevPreviews => {
-      // Revoke the URL to prevent memory leaks
       URL.revokeObjectURL(prevPreviews[index]);
       return prevPreviews.filter((_, i) => i !== index);
     });
@@ -146,6 +143,11 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
           className="border rounded p-2"
           required
         />
+      </div>
+
+      {/* Warning message about required fields */}
+      <div className="text-sm text-amber-600 mb-2">
+        * Please complete Location, Department, and Work Station before analyzing photos
       </div>
 
       <div className="flex gap-4 justify-center">

@@ -79,19 +79,19 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
           </div>
         </div>
 
-        {/* Category Scores - more compact */}
+        {/* Category Scores - updated layout */}
         <div className="space-y-2">
           {Object.entries(analysis.scores).map(([key, score]) => (
             <div key={key} className="border-b pb-1">
-              <h3 className="text-md font-semibold mb-0.5 capitalize">
-                {key === 'setInOrder' ? 'Set in Order' : key}
-              </h3>
-              <div className="flex justify-between items-center mb-0.5">
-                <span className="text-sm">{score.toFixed(1)}%</span>
+              <div className="flex justify-between items-center">
+                <h3 className="text-md font-semibold capitalize">
+                  {key === 'setInOrder' ? 'Set in Order' : key}
+                </h3>
+                <span className="text-sm font-medium">{score.toFixed(1)}%</span>
               </div>
               <Progress
                 value={score}
-                className={`${getScoreColor(score)} h-3`}
+                className={`${getScoreColor(score)} h-2 mt-1`}
               />
             </div>
           ))}
