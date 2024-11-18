@@ -39,6 +39,10 @@ author = "agent"
 task = "workflow.run"
 args = "Development Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "GitHub Repository Setup"
+
 [[workflows.workflow]]
 name = "Development Server"
 author = "agent"
@@ -53,3 +57,17 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "GitHub Repository Setup"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "git status && git remote -v"
