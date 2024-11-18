@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Camera, Upload, Loader2 } from "lucide-react";
+import { Camera, Upload, Loader2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Analysis } from "@/lib/types";
 
@@ -17,22 +17,24 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
   const { toast } = useToast();
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length > 4) {
+    const newFiles = Array.from(e.target.files || []);
+    const totalFiles = photos.length + newFiles.length;
+    
+    if (totalFiles > 4) {
       toast({
-        title: "Too many photos",
-        description: "Please select up to 4 photos",
+        title: "Maximum Photos Reached",
+        description: "You can only add up to 4 photos per evaluation. Please remove some photos first.",
         variant: "destructive",
       });
       return;
     }
 
-    const validFiles = files.filter(file => {
+    const validFiles = newFiles.filter(file => {
       const validTypes = ['image/jpeg', 'image/png', 'image/heic', 'image/heif'];
       return validTypes.includes(file.type);
     });
 
-    if (validFiles.length !== files.length) {
+    if (validFiles.length !== newFiles.length) {
       toast({
         title: "Invalid file type",
         description: "Please only upload JPG, PNG, HEIC, or HEIF images",
@@ -41,13 +43,19 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
       return;
     }
 
-    setPhotos(validFiles);
+    // Append new files to existing ones
+    setPhotos(prevPhotos => [...prevPhotos, ...validFiles]);
     
-    // Create previews
+    // Create and append new previews
     const newPreviews = await Promise.all(
       validFiles.map(file => URL.createObjectURL(file))
     );
-    setPreviews(newPreviews);
+    setPreviews(prevPreviews => [...prevPreviews, ...newPreviews]);
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos(prevPhotos => prevPhotos.filter((_, i) => i !== index));
+    setPreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -149,33 +157,47 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
         onChange={handleFileSelect}
       />
 
-      {previews.length > 0 && (
-        <div className={`grid ${getGridTemplate(previews.length)} gap-4`}>
-          {previews.map((preview, index) => (
-            <Card 
-              key={index} 
-              className={`relative overflow-hidden ${getCardSize(index, previews.length)} transition-transform hover:scale-[1.02]`}
-            >
-              <img
-                src={preview}
-                alt={`Preview ${index + 1}`}
-                className="w-full h-full object-cover rounded-[inherit]"
-              />
-            </Card>
-          ))}
-        </div>
-      )}
+      <div className={`grid ${getGridTemplate(4)} gap-4`}>
+        {[...Array(4)].map((_, index) => (
+          <Card 
+            key={index} 
+            className={`relative overflow-hidden ${getCardSize(index, 4)} ${
+              index < previews.length ? '' : 'border-dashed border-2 flex items-center justify-center'
+            }`}
+          >
+            {index < previews.length ? (
+              <>
+                <img
+                  src={previews[index]}
+                  alt={`Preview ${index + 1}`}
+                  className="w-full h-full object-cover rounded-[inherit]"
+                />
+                <button
+                  onClick={() => removePhoto(index)}
+                  className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
+                  aria-label="Remove photo"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <div className="text-center p-4 text-gray-400">
+                <Camera className="mx-auto h-8 w-8 mb-2" />
+                <p>Photo {index + 1}</p>
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
 
-      {photos.length > 0 && (
-        <Button 
-          onClick={handleSubmit} 
-          className="w-full"
-          disabled={loading}
-        >
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Analyze Photos
-        </Button>
-      )}
+      <Button 
+        onClick={handleSubmit} 
+        className="w-full"
+        disabled={loading || photos.length === 0}
+      >
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Analyze Photos
+      </Button>
     </div>
   );
 }
