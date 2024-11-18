@@ -13,6 +13,9 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [location, setLocation] = useState('');
+  const [department, setDepartment] = useState('');
+  const [workStation, setWorkStation] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -63,6 +66,15 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
   };
 
   const handleSubmit = async () => {
+    if (!location || !department || !workStation) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all location details",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (photos.length === 0) {
       toast({
         title: "No photos selected",
@@ -75,6 +87,9 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
     setLoading(true);
     const formData = new FormData();
     photos.forEach(photo => formData.append('photos', photo));
+    formData.append('location', location);
+    formData.append('department', department);
+    formData.append('workStation', workStation);
 
     try {
       const response = await fetch('/api/analyze', {
@@ -87,7 +102,12 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
       }
 
       const analysis = await response.json();
-      onAnalysisComplete(analysis);
+      onAnalysisComplete({
+        ...analysis,
+        location,
+        department,
+        workStation
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -101,6 +121,33 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
 
   return (
     <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <input
+          type="text"
+          placeholder="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className="border rounded p-2"
+          required
+        />
+        <input
+          type="text"
+          placeholder="Department"
+          value={department}
+          onChange={(e) => setDepartment(e.target.value)}
+          className="border rounded p-2"
+          required
+        />
+        <input
+          type="text"
+          placeholder="Work Station"
+          value={workStation}
+          onChange={(e) => setWorkStation(e.target.value)}
+          className="border rounded p-2"
+          required
+        />
+      </div>
+
       <div className="flex gap-4 justify-center">
         <Button
           onClick={() => fileInputRef.current?.click()}
@@ -168,7 +215,7 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
       <Button 
         onClick={handleSubmit} 
         className="w-full"
-        disabled={loading || photos.length === 0}
+        disabled={loading || photos.length === 0 || !location || !department || !workStation}
       >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Analyze Photos

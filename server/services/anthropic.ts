@@ -8,28 +8,24 @@ const anthropic = new Anthropic({
 
 export async function analyze5SFromImages(imageBase64Array: string[]): Promise<Analysis> {
   try {
-    const prompt = `Analyze these workplace images using 5S methodology. For each category, provide:
-1. Sort (Seiri):
-   - Look for: Unnecessary items, expired materials, broken tools
-   - Example violation: "Obsolete equipment taking up workspace"
+    const prompt = `Analyze these workplace images using 5S methodology. For each category, provide detailed analysis with clear paragraph breaks:
 
-2. Set in Order (Seiton):
-   - Look for: Item organization, clear labeling, efficient layout
-   - Example violation: "Tools not returned to designated storage locations"
+Sort (Seiri):
+[Analysis and score]
 
-3. Shine (Seiso):
-   - Look for: Cleanliness, maintenance issues, regular cleaning
-   - Example violation: "Dust accumulation on equipment surfaces"
+Set in Order (Seiton):
+[Analysis and score]
 
-4. Standardize (Seiketsu):
-   - Look for: Consistent processes, visual management, clear procedures
-   - Example violation: "Inconsistent labeling systems across workstations"
+Shine (Seiso):
+[Analysis and score]
 
-5. Sustain (Shitsuke):
-   - Look for: Adherence to standards, continuous improvement
-   - Example violation: "Maintenance checklists not being followed"
+Standardize (Seiketsu):
+[Analysis and score]
 
-Provide scores out of 100 for each category and an overall score. Also provide specific improvement suggestions. Return the results in JSON format with keys: overallScore, scores (object with sort, setInOrder, shine, standardize, sustain), and suggestions.`;
+Sustain (Shitsuke):
+[Analysis and score]
+
+Provide scores out of 100 for each category and an overall score. Format suggestions with double line breaks between sections. Return in JSON format with keys: overallScore, scores (object), and suggestions (string with \n\n between sections).`;
 
     const response = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
@@ -54,7 +50,13 @@ Provide scores out of 100 for each category and an overall score. Also provide s
     });
 
     const result = JSON.parse(response.content[0].text);
-    return result as Analysis;
+    return {
+      ...result,
+      location: '',
+      department: '',
+      workStation: '',
+      imageUrls: [] // We'll handle image URLs on the client side
+    } as Analysis;
   } catch (error) {
     console.error('Anthropic analysis failed:', error);
     throw new Error('Failed to analyze images');

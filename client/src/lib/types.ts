@@ -1,4 +1,7 @@
 export interface Analysis {
+  location: string;
+  department: string;
+  workStation: string;
   overallScore: number;
   scores: {
     sort: number;
@@ -8,6 +11,7 @@ export interface Analysis {
     sustain: number;
   };
   suggestions?: string;
+  imageUrls: string[];
 }
 
 export interface AnalysisResult {
