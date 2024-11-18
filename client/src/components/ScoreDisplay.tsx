@@ -19,10 +19,14 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
   const downloadPDF = () => {
     const element = document.getElementById('score-report');
     const opt = {
-      margin: 1,
+      margin: 0.5,
       filename: `5S-Report-${analysis.location}-${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        logging: true
+      },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
     
@@ -54,6 +58,19 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
           </div>
         </div>
 
+        {/* Images Grid - moved up */}
+        <div className="grid grid-cols-2 gap-4">
+          {analysis.imageUrls.map((url, index) => (
+            <div key={index} className="aspect-square w-full max-h-[200px]">
+              <img
+                src={url}
+                alt={`Workplace photo ${index + 1}`}
+                className="w-full h-full object-cover rounded"
+              />
+            </div>
+          ))}
+        </div>
+
         {/* Overall Score */}
         <div className="text-center border-t border-b py-4">
           <h2 className="text-2xl font-bold mb-2">Overall Score</h2>
@@ -62,32 +79,19 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
           </div>
         </div>
 
-        {/* Category Scores */}
-        <div className="space-y-6">
+        {/* Category Scores - made more compact */}
+        <div className="space-y-4">
           {Object.entries(analysis.scores).map(([key, score]) => (
-            <div key={key} className="border-b pb-4">
-              <h3 className="text-xl font-semibold mb-2 capitalize">
+            <div key={key} className="border-b pb-2">
+              <h3 className="text-lg font-semibold mb-1 capitalize">
                 {key === 'setInOrder' ? 'Set in Order' : key}
               </h3>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-lg">{score.toFixed(1)}%</span>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-md">{score.toFixed(1)}%</span>
               </div>
               <Progress
                 value={score}
-                className={getScoreColor(score)}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Images Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          {analysis.imageUrls.map((url, index) => (
-            <div key={index} className="aspect-square">
-              <img
-                src={url}
-                alt={`Workplace photo ${index + 1}`}
-                className="w-full h-full object-cover rounded"
+                className={`${getScoreColor(score)} h-4`}
               />
             </div>
           ))}
