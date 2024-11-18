@@ -13,6 +13,7 @@ createRoot(document.getElementById("root")!).render(
     <SWRConfig value={{ fetcher }}>
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/home" component={Home} />
         <Route path="/trial" component={Trial} />
         <Route>404 Page Not Found</Route>
       </Switch>

@@ -76,7 +76,7 @@ export default function Home() {
               Get Fast Results. Eliminate Inefficient, biased 5S scoring.
             </p>
             <div className="space-y-4">
-              <Link href="/trial">
+              <Link href="/home">
                 <Button size="lg" className="bg-gradient-to-r from-blue-300 to-blue-400 text-black border-2 border-black px-8 py-6 text-lg rounded-full shadow-md hover:shadow-lg transition-all duration-300">
                   Start Free Trial
                 </Button>
