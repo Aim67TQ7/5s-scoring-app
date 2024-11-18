@@ -87,6 +87,37 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
     }
   };
 
+  const getGridTemplate = (count: number) => {
+    switch (count) {
+      case 1:
+        return "grid-cols-1";
+      case 2:
+        return "grid-cols-2";
+      case 3:
+        return "md:grid-cols-3 grid-cols-2";
+      case 4:
+        return "grid-cols-2 md:grid-cols-4";
+      default:
+        return "grid-cols-2";
+    }
+  };
+
+  const getCardSize = (index: number, total: number) => {
+    if (total === 1) return "col-span-1 row-span-1 aspect-video";
+    if (total === 2) return "col-span-1 aspect-square";
+    if (total === 3) {
+      return index === 0 
+        ? "col-span-2 md:col-span-2 aspect-video" 
+        : "col-span-1 aspect-square";
+    }
+    if (total === 4) {
+      return index === 0 
+        ? "col-span-2 md:col-span-2 aspect-video" 
+        : "col-span-1 aspect-square";
+    }
+    return "col-span-1 aspect-square";
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex gap-4 justify-center">
@@ -119,13 +150,16 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
       />
 
       {previews.length > 0 && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className={`grid ${getGridTemplate(previews.length)} gap-4`}>
           {previews.map((preview, index) => (
-            <Card key={index} className="relative aspect-square overflow-hidden">
+            <Card 
+              key={index} 
+              className={`relative overflow-hidden ${getCardSize(index, previews.length)} transition-transform hover:scale-[1.02]`}
+            >
               <img
                 src={preview}
                 alt={`Preview ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded-[inherit]"
               />
             </Card>
           ))}
