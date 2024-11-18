@@ -8,6 +8,29 @@ const anthropic = new Anthropic({
 
 export async function analyze5SFromImages(imageBase64Array: string[]): Promise<Analysis> {
   try {
+    const prompt = `Analyze these workplace images using 5S methodology. For each category, provide:
+1. Sort (Seiri):
+   - Look for: Unnecessary items, expired materials, broken tools
+   - Example violation: "Obsolete equipment taking up workspace"
+
+2. Set in Order (Seiton):
+   - Look for: Item organization, clear labeling, efficient layout
+   - Example violation: "Tools not returned to designated storage locations"
+
+3. Shine (Seiso):
+   - Look for: Cleanliness, maintenance issues, regular cleaning
+   - Example violation: "Dust accumulation on equipment surfaces"
+
+4. Standardize (Seiketsu):
+   - Look for: Consistent processes, visual management, clear procedures
+   - Example violation: "Inconsistent labeling systems across workstations"
+
+5. Sustain (Shitsuke):
+   - Look for: Adherence to standards, continuous improvement
+   - Example violation: "Maintenance checklists not being followed"
+
+Provide scores out of 100 for each category and an overall score. Also provide specific improvement suggestions. Return the results in JSON format with keys: overallScore, scores (object with sort, setInOrder, shine, standardize, sustain), and suggestions.`;
+
     const response = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 1024,
@@ -16,7 +39,7 @@ export async function analyze5SFromImages(imageBase64Array: string[]): Promise<A
         content: [
           {
             type: "text",
-            text: "Analyze these workplace images using 5S methodology (Sort, Set in Order, Shine, Standardize, Sustain). Provide scores out of 100 for each category and an overall score. Also provide improvement suggestions. Return the results in JSON format with keys: overallScore, scores (object with sort, setInOrder, shine, standardize, sustain), and suggestions."
+            text: prompt
           },
           ...imageBase64Array.map(base64 => ({
             type: "image",

@@ -55,7 +55,11 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
 
   const removePhoto = (index: number) => {
     setPhotos(prevPhotos => prevPhotos.filter((_, i) => i !== index));
-    setPreviews(prevPreviews => prevPreviews.filter((_, i) => i !== index));
+    setPreviews(prevPreviews => {
+      // Revoke the URL to prevent memory leaks
+      URL.revokeObjectURL(prevPreviews[index]);
+      return prevPreviews.filter((_, i) => i !== index);
+    });
   };
 
   const handleSubmit = async () => {
@@ -95,37 +99,6 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
     }
   };
 
-  const getGridTemplate = (count: number) => {
-    switch (count) {
-      case 1:
-        return "grid-cols-1";
-      case 2:
-        return "grid-cols-2";
-      case 3:
-        return "md:grid-cols-3 grid-cols-2";
-      case 4:
-        return "grid-cols-2 md:grid-cols-4";
-      default:
-        return "grid-cols-2";
-    }
-  };
-
-  const getCardSize = (index: number, total: number) => {
-    if (total === 1) return "col-span-1 row-span-1 aspect-video";
-    if (total === 2) return "col-span-1 aspect-square";
-    if (total === 3) {
-      return index === 0 
-        ? "col-span-2 md:col-span-2 aspect-video" 
-        : "col-span-1 aspect-square";
-    }
-    if (total === 4) {
-      return index === 0 
-        ? "col-span-2 md:col-span-2 aspect-video" 
-        : "col-span-1 aspect-square";
-    }
-    return "col-span-1 aspect-square";
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex gap-4 justify-center">
@@ -157,23 +130,25 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
         onChange={handleFileSelect}
       />
 
-      <div className={`grid ${getGridTemplate(4)} gap-4`}>
-        {[...Array(4)].map((_, index) => (
+      <div className="grid grid-cols-2 gap-4">
+        {[...Array(4)].map((_, i) => (
           <Card 
-            key={index} 
-            className={`relative overflow-hidden ${getCardSize(index, 4)} ${
-              index < previews.length ? '' : 'border-dashed border-2 flex items-center justify-center'
+            key={i} 
+            className={`relative overflow-hidden aspect-square ${
+              i < previews.length 
+                ? '' 
+                : 'border-dashed border-2 flex items-center justify-center'
             }`}
           >
-            {index < previews.length ? (
+            {i < previews.length ? (
               <>
                 <img
-                  src={previews[index]}
-                  alt={`Preview ${index + 1}`}
+                  src={previews[i]}
+                  alt={`Preview ${i + 1}`}
                   className="w-full h-full object-cover rounded-[inherit]"
                 />
                 <button
-                  onClick={() => removePhoto(index)}
+                  onClick={() => removePhoto(i)}
                   className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70"
                   aria-label="Remove photo"
                 >
@@ -183,7 +158,7 @@ export function PhotoCapture({ onAnalysisComplete }: PhotoCaptureProps) {
             ) : (
               <div className="text-center p-4 text-gray-400">
                 <Camera className="mx-auto h-8 w-8 mb-2" />
-                <p>Photo {index + 1}</p>
+                <p>Photo {i + 1}</p>
               </div>
             )}
           </Card>
