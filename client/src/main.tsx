@@ -21,22 +21,20 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <SWRConfig value={{ fetcher }}>
       <Switch>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/trial" element={<Trial />} />
-        <Route path="/support/help" element={<HelpCenter />} />
-        <Route path="/support/contact" element={<Contact />} />
-        <Route path="/support/privacy" element={<Privacy />} />
-        <Route path="/support/terms" element={<Terms />} />
-        <Route path="/product/features" element={<Features />} />
-        <Route path="/product/pricing" element={<Pricing />} />
-        <Route path="/company/about" element={<About />} />
-        <Route path="/company/blog" element={<Blog />} />
-        <Route path="/company/careers" element={<Careers />} />
-        <Route>
-          <div>404 Page Not Found</div>
-        </Route>
+        <Route path="/" component={LandingPage} />
+        <Route path="/trial" component={Trial} />
+        <Route path="/support/help" component={HelpCenter} />
+        <Route path="/support/contact" component={Contact} />
+        <Route path="/support/privacy" component={Privacy} />
+        <Route path="/support/terms" component={Terms} />
+        <Route path="/product/features" component={Features} />
+        <Route path="/product/pricing" component={Pricing} />
+        <Route path="/company/about" component={About} />
+        <Route path="/company/blog" component={Blog} />
+        <Route path="/company/careers" component={Careers} />
+        <Route>404 Page Not Found</Route>
       </Switch>
       <Toaster />
     </SWRConfig>
-  </StrictMode>
+  </StrictMode>,
 );
