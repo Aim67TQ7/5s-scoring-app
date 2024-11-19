@@ -14,16 +14,26 @@ export default function LandingPage() {
       <nav className="bg-white border-b border-zinc-200 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <span className="text-2xl font-bold text-gray-900">5S-AI.COM</span>
+            <Link href="/">
+              <span className="text-2xl font-bold text-gray-900 cursor-pointer">5S-AI.COM</span>
+            </Link>
           </div>
           
           <div className="hidden md:flex items-center space-x-6">
-            <Button variant="ghost" className="text-zinc-700 hover:text-gray-900">Features</Button>
-            <Button variant="ghost" className="text-zinc-700 hover:text-gray-900">About</Button>
-            <Button variant="ghost" className="text-zinc-700 hover:text-gray-900">Contact</Button>
-            <Button className="bg-gradient-to-r from-blue-300 to-blue-400 text-black border-2 border-black shadow-md hover:shadow-lg transition-all duration-300">
-              Log In
-            </Button>
+            <Link href="/product/features">
+              <Button variant="ghost" className="text-zinc-700 hover:text-gray-900">Features</Button>
+            </Link>
+            <Link href="/company/about">
+              <Button variant="ghost" className="text-zinc-700 hover:text-gray-900">About</Button>
+            </Link>
+            <Link href="/support/contact">
+              <Button variant="ghost" className="text-zinc-700 hover:text-gray-900">Contact</Button>
+            </Link>
+            <Link href="/login">
+              <Button className="bg-gradient-to-r from-blue-300 to-blue-400 text-black border-2 border-black shadow-md hover:shadow-lg transition-all duration-300">
+                Log In
+              </Button>
+            </Link>
           </div>
 
           <div className="md:hidden">
@@ -36,12 +46,20 @@ export default function LandingPage() {
           <div className="md:hidden border-t border-zinc-200 bg-white">
             <nav className="container mx-auto px-4 py-4">
               <div className="flex flex-col space-y-3">
-                <Button variant="ghost" className="w-full justify-start text-zinc-700">Features</Button>
-                <Button variant="ghost" className="w-full justify-start text-zinc-700">About</Button>
-                <Button variant="ghost" className="w-full justify-start text-zinc-700">Contact</Button>
-                <Button className="w-full justify-center bg-gradient-to-r from-blue-300 to-blue-400 text-black border-2 border-black shadow-md hover:shadow-lg transition-all duration-300">
-                  Log In
-                </Button>
+                <Link href="/product/features">
+                  <Button variant="ghost" className="w-full justify-start text-zinc-700">Features</Button>
+                </Link>
+                <Link href="/company/about">
+                  <Button variant="ghost" className="w-full justify-start text-zinc-700">About</Button>
+                </Link>
+                <Link href="/support/contact">
+                  <Button variant="ghost" className="w-full justify-start text-zinc-700">Contact</Button>
+                </Link>
+                <Link href="/login">
+                  <Button className="w-full justify-center bg-gradient-to-r from-blue-300 to-blue-400 text-black border-2 border-black shadow-md hover:shadow-lg transition-all duration-300">
+                    Log In
+                  </Button>
+                </Link>
               </div>
             </nav>
           </div>
@@ -169,7 +187,9 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-12">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">5S-AI.com</h2>
+              <Link href="/">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 cursor-pointer">5S-AI.com</h2>
+              </Link>
               <p className="text-gray-600">
                 Pioneering the future of workplace organization and efficiency.
               </p>
@@ -177,15 +197,30 @@ export default function LandingPage() {
             {[
               {
                 title: "Product",
-                links: ["Features", "Pricing", "Case Studies", "Documentation"]
+                links: [
+                  { name: "Features", path: "/product/features" },
+                  { name: "Pricing", path: "/product/pricing" },
+                  { name: "Case Studies", path: "/product/case-studies" },
+                  { name: "Documentation", path: "/product/documentation" }
+                ]
               },
               {
                 title: "Support",
-                links: ["Help Center", "Contact Us", "Privacy", "Terms"]
+                links: [
+                  { name: "Help Center", path: "/support/help" },
+                  { name: "Contact Us", path: "/support/contact" },
+                  { name: "Privacy", path: "/support/privacy" },
+                  { name: "Terms", path: "/support/terms" }
+                ]
               },
               {
                 title: "Company",
-                links: ["About", "Blog", "Careers", "Press"]
+                links: [
+                  { name: "About", path: "/company/about" },
+                  { name: "Blog", path: "/company/blog" },
+                  { name: "Careers", path: "/company/careers" },
+                  { name: "Press", path: "/company/press" }
+                ]
               }
             ].map((section, index) => (
               <div key={index}>
@@ -193,7 +228,11 @@ export default function LandingPage() {
                 <ul className="space-y-3">
                   {section.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      <Button variant="link" className="p-0 h-auto text-gray-600 hover:text-blue-600">{link}</Button>
+                      <Link href={link.path}>
+                        <Button variant="link" className="p-0 h-auto text-gray-600 hover:text-blue-600">
+                          {link.name}
+                        </Button>
+                      </Link>
                     </li>
                   ))}
                 </ul>
