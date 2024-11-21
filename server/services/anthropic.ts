@@ -6,9 +6,31 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Helper function for exponential backoff retry
+async function retryWithExponentialBackoff<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error as Error;
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError || new Error('Operation failed after maximum retries');
+}
+
 export async function analyze5SFromImages(imageBase64Array: string[]): Promise<Analysis> {
   try {
-    const prompt = `As a 5S workplace organization expert, provide a comprehensive analysis of the workplace images. Structure your response in this JSON format:
+    const prompt = `As a 5S workplace organization expert, analyze these workplace images and provide a detailed assessment in this JSON format:
 
 {
   "overallScore": number (0-100),
@@ -19,46 +41,28 @@ export async function analyze5SFromImages(imageBase64Array: string[]): Promise<A
     "standardize": number (0-100),
     "sustain": number (0-100)
   },
-  "categoryDetails": {
+  "categories": {
     "sort": {
-      "score": number (0-100),
       "findings": string[],
-      "shortTermRecommendations": string[],
-      "longTermRecommendations": string[],
-      "positiveObservations": string[],
-      "areasForImprovement": string[]
+      "recommendations": [{
+        "description": string,
+        "timeframe": "immediate"|"short-term"|"long-term",
+        "priority": "high"|"medium"|"low"
+      }]
     },
-    "setInOrder": {/* same structure as sort */},
-    "shine": {/* same structure as sort */},
-    "standardize": {/* same structure as sort */},
-    "sustain": {/* same structure as sort */}
+    "setInOrder": {/* same structure */},
+    "shine": {/* same structure */},
+    "standardize": {/* same structure */},
+    "sustain": {/* same structure */}
   },
-  "priorityImprovements": [{
-    "category": string,
-    "issue": string,
-    "impact": "high"|"medium"|"low",
-    "recommendation": string,
-    "estimatedEffort": "quick-win"|"medium-term"|"long-term",
-    "expectedBenefits": string[]
-  }],
   "suggestions": string
 }
 
 Evaluate each 5S category comprehensively using these detailed criteria:
 
-1. Sort (Seiri) - Organization & Necessity:
-- Equipment Essentials: Are only required tools and equipment present?
-- Inventory Management: Is there excess inventory or WIP materials?
-- Document Control: Are documents current and necessary?
-- Space Optimization: Is space used efficiently without clutter?
-- Safety Equipment: Is PPE appropriate and properly maintained?
+1. Ensure workstations, equipment, and storage are clutter-free, with only necessary items present, including tools, parts, containers, and PPE. Remove unauthorized or outdated documents, trash, scrap, and personal items (except coats during cold weather). Verify that cleaning equipment and supplies are only in the required areas. Ensure floors, aisles, and work surfaces are free of debris. Confirm that inventory and WIP levels are within specified limits and excess parts or containers are not present.
 
-2. Set in Order (Seiton) - Efficiency & Access:
-- Workflow Optimization: Is the layout conducive to efficient work?
-- Visual Organization: Are items clearly labeled and zones marked?
-- Tool Organization: Are tools arranged logically and stored properly?
-- Access Efficiency: Are frequently used items easily accessible?
-- Space Management: Is storage optimized and well-organized?
+2. Ensure all equipment, tools, and storage are properly labeled and foot printed, including tables, bins, racks, toolboxes, and part containers. Verify that emergency equipment, including E-stops, first aid, exits, and hazardous materials, are clearly identified and easily accessible. Confirm that documentation, visual aids, and checklists are stored in labeled locations. Check that floors, aisles, and cleaning equipment are footprinted, labeled, and organized. Ensure personal items are in designated areas, and inventory and WIP levels are properly marked with minimum/maximum indicators. Review if all tools, fixtures, and gauges are in their assigned spots and labeled appropriately.
 
 3. Shine (Seiso) - Cleanliness & Maintenance:
 - Workplace Cleanliness: Are all areas clean and well-maintained?
@@ -108,11 +112,12 @@ Format recommendations to clearly distinguish between:
 
 Include specific examples from the images to support your analysis. Format the suggestions section with clear breaks using \\n\\n between major points.`;
 
-    const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 1024,
-      temperature: 0.7,
-      messages: [{
+    const response = await retryWithExponentialBackoff(async () => {
+      const result = await anthropic.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 4096,
+        temperature: 0.3, // Lower temperature for more consistent JSON formatting
+        messages: [{
         role: "user",
         content: [
           { type: "text", text: prompt },
@@ -127,36 +132,39 @@ Include specific examples from the images to support your analysis. Format the s
         ]
       }]
     });
+      return result;
+    });
 
     // Extract and validate response
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
+    
+    // Log full response for debugging
+    console.log('Raw Anthropic response:', responseText);
+    
     try {
       // Remove any potential markdown formatting
       const jsonStr = responseText.replace(/```json\n?|\n?```/g, '').trim();
       const result = JSON.parse(jsonStr);
       
       // Validate response structure
-      if (!result.overallScore || !result.scores || !result.suggestions || !result.categoryDetails || !result.priorityImprovements) {
-        throw new Error('Invalid response format');
+      if (!result.overallScore || !result.scores || !result.suggestions || !result.categories) {
+        console.error('Invalid response structure:', result);
+        throw new Error('Invalid response format - missing required fields');
       }
       
-      // Validate score structure and category details
+      // Validate score structure and categories
       const requiredScores = ['sort', 'setInOrder', 'shine', 'standardize', 'sustain'];
       for (const score of requiredScores) {
         if (typeof result.scores[score] !== 'number') {
+          console.error(`Invalid score for ${score}:`, result.scores[score]);
           throw new Error(`Missing or invalid score: ${score}`);
         }
-        if (!result.categoryDetails[score] || 
-            typeof result.categoryDetails[score].score !== 'number' ||
-            !Array.isArray(result.categoryDetails[score].findings) ||
-            !Array.isArray(result.categoryDetails[score].recommendations)) {
+        if (!result.categories[score] || 
+            !Array.isArray(result.categories[score].findings) ||
+            !Array.isArray(result.categories[score].recommendations)) {
+          console.error(`Invalid category details for ${score}:`, result.categories[score]);
           throw new Error(`Missing or invalid category details for: ${score}`);
         }
-      }
-      
-      // Validate priority improvements
-      if (!Array.isArray(result.priorityImprovements)) {
-        throw new Error('Priority improvements must be an array');
       }
       
       return {
