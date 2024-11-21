@@ -9,113 +9,65 @@ const anthropic = new Anthropic({
 export async function analyze5SFromImages(imageBase64Array: string[]): Promise<Analysis> {
   try {
 
-    const prompt = `You are a 5S workplace organization expert. Analyze these workplace images using 5S methodology and return a JSON object with the following structure:
+    const prompt = `As a 5S expert, analyze these workplace images and provide a detailed assessment in this JSON format:
 
 {
   "overallScore": number (0-100),
-  "scores": {
-    "sort": number (0-100),
-    "setInOrder": number (0-100),
-    "shine": number (0-100),
-    "standardize": number (0-100),
-    "sustain": number (0-100)
-  },
+  "scores": { "sort": number, "setInOrder": number, "shine": number, "standardize": number, "sustain": number },
   "categoryDetails": {
-    "sort": {
-      "score": number (0-100),
-      "findings": string[],
-      "recommendations": string[]
-    },
-    "setInOrder": {
-      "score": number (0-100),
-      "findings": string[],
-      "recommendations": string[]
-    },
-    "shine": {
-      "score": number (0-100),
-      "findings": string[],
-      "recommendations": string[]
-    },
-    "standardize": {
-      "score": number (0-100),
-      "findings": string[],
-      "recommendations": string[]
-    },
-    "sustain": {
-      "score": number (0-100),
+    "[category]": {
+      "score": number,
       "findings": string[],
       "recommendations": string[]
     }
   },
-  "priorityImprovements": [
-    {
-      "category": string,
-      "issue": string,
-      "impact": "high" | "medium" | "low",
-      "recommendation": string,
-      "estimatedEffort": "quick-win" | "medium-term" | "long-term"
-    }
-  ],
+  "priorityImprovements": [{
+    "category": string,
+    "issue": string,
+    "impact": "high|medium|low",
+    "recommendation": string,
+    "estimatedEffort": "quick-win|medium-term|long-term"
+  }],
   "suggestions": string
 }
 
-For each 5S category, perform a detailed analysis using these criteria:
+Evaluate each 5S category using these integrated criteria:
 
-1. Sort (Seiri) - Evaluate the separation of necessary from unnecessary items:
-- Workstation Essentials: Are only required tools, equipment, and materials present?
-- Documentation: Are there outdated or unnecessary documents, manuals, or charts?
-- Inventory Management: Is there excess inventory or WIP beyond immediate needs?
-- Personal Items: Are personal belongings properly stored or removed?
-- Safety Equipment: Is PPE appropriate and necessary for the work area?
-- Storage Solutions: Are storage areas free from obsolete or redundant items?
+1. Sort (Seiri):
+- Necessity: Evaluate if only required tools, equipment, and materials are present
+- Organization: Check for excess inventory, unnecessary documents, and proper storage
+- Safety: Assess PPE appropriateness and removal of hazards
 
-2. Set in Order (Seiton) - Analyze the organization and efficiency of item placement:
-- Visual Management: Are items clearly labeled and zones marked?
-- Accessibility: Are frequently used items within easy reach?
-- Flow Optimization: Does the layout support efficient work processes?
-- Storage Systems: Are storage solutions appropriate and well-organized?
-- Tool Organization: Are tools arranged logically and stored properly?
-- Space Utilization: Is space used effectively without overcrowding?
+2. Set in Order (Seiton):
+- Efficiency: Analyze workspace layout, tool accessibility, and flow optimization
+- Visual Management: Check labeling, zoning, and storage systems
+- Space Utilization: Evaluate organization methods and area optimization
 
-3. Shine (Seiso) - Assess cleanliness and maintenance:
-- Equipment Condition: Are machines, tools, and equipment clean and well-maintained?
-- Work Area Cleanliness: Are floors, surfaces, and common areas clean?
-- Cleaning Standards: Are cleaning schedules and responsibilities clearly defined?
-- Preventive Maintenance: Are maintenance schedules followed and documented?
-- Waste Management: Are waste disposal systems effective and maintained?
-- Inspection Points: Are regular cleaning inspection points established?
+3. Shine (Seiso):
+- Cleanliness: Assess workspace, equipment, and tool maintenance
+- Maintenance: Review cleaning schedules, waste management, and inspection processes
+- Standards: Evaluate cleaning procedures and responsibility assignment
 
-4. Standardize (Seiketsu) - Review standardization of best practices:
-- Visual Controls: Are visual aids and controls effectively implemented?
-- Standard Procedures: Are work procedures standardized and documented?
-- Workplace Organization: Are organizational systems consistently maintained?
-- Color Coding: Is color coding used effectively for visual management?
-- Communication Systems: Are communication boards up-to-date and organized?
-- Best Practices: Are best practices documented and shared?
+4. Standardize (Seiketsu):
+- Process Documentation: Check for standardized procedures and visual controls
+- Communication: Assess information sharing and visual management systems
+- Consistency: Review organizational systems and best practices implementation
 
-5. Sustain (Shitsuke) - Evaluate the maintenance of 5S practices:
-- Audit Systems: Are regular 5S audits conducted and documented?
-- Training Programs: Is there evidence of ongoing 5S training?
-- Employee Engagement: Do employees demonstrate understanding and commitment?
-- Continuous Improvement: Are improvement suggestions implemented?
-- Performance Tracking: Are 5S metrics tracked and displayed?
-- Management Support: Is there visible management support for 5S?
+5. Sustain (Shitsuke):
+- Engagement: Evaluate employee participation and understanding
+- Monitoring: Check audit systems and performance tracking
+- Improvement: Assess training programs and management support
 
-Scoring Guidelines:
-- 90-100: Exceptional implementation
-- 80-89: Strong implementation with minor improvements needed
-- 70-79: Good implementation with some notable gaps
-- 60-69: Basic implementation with significant improvement opportunities
-- Below 60: Requires immediate attention and major improvements
+Scoring Scale:
+90-100: Exceptional | 80-89: Strong | 70-79: Good | 60-69: Basic | <60: Needs Improvement
 
-For each category:
-1. Provide specific observations based on visible evidence
-2. List both positive findings and areas for improvement
-3. Give actionable recommendations
-4. Consider the impact on safety, efficiency, and quality
-5. Prioritize recommendations based on impact and effort required
+For each category, provide:
+1. Evidence-based observations
+2. Key findings (positive and negative)
+3. Prioritized, actionable recommendations
+4. Impact assessment on safety and efficiency
 
-Format the suggestions with clear structure and paragraph breaks using \\n\\n between sections. Prioritize improvements based on their potential impact on workplace efficiency and safety.`;
+Format suggestions with clear sections using \\n\\n breaks.`;
 
     const response = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
