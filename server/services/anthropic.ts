@@ -8,66 +8,105 @@ const anthropic = new Anthropic({
 
 export async function analyze5SFromImages(imageBase64Array: string[]): Promise<Analysis> {
   try {
-
-    const prompt = `As a 5S expert, analyze these workplace images and provide a detailed assessment in this JSON format:
+    const prompt = `As a 5S workplace organization expert, provide a comprehensive analysis of the workplace images. Structure your response in this JSON format:
 
 {
   "overallScore": number (0-100),
-  "scores": { "sort": number, "setInOrder": number, "shine": number, "standardize": number, "sustain": number },
+  "scores": {
+    "sort": number (0-100),
+    "setInOrder": number (0-100),
+    "shine": number (0-100),
+    "standardize": number (0-100),
+    "sustain": number (0-100)
+  },
   "categoryDetails": {
-    "[category]": {
-      "score": number,
+    "sort": {
+      "score": number (0-100),
       "findings": string[],
-      "recommendations": string[]
-    }
+      "shortTermRecommendations": string[],
+      "longTermRecommendations": string[],
+      "positiveObservations": string[],
+      "areasForImprovement": string[]
+    },
+    "setInOrder": {/* same structure as sort */},
+    "shine": {/* same structure as sort */},
+    "standardize": {/* same structure as sort */},
+    "sustain": {/* same structure as sort */}
   },
   "priorityImprovements": [{
     "category": string,
     "issue": string,
-    "impact": "high|medium|low",
+    "impact": "high"|"medium"|"low",
     "recommendation": string,
-    "estimatedEffort": "quick-win|medium-term|long-term"
+    "estimatedEffort": "quick-win"|"medium-term"|"long-term",
+    "expectedBenefits": string[]
   }],
   "suggestions": string
 }
 
-Evaluate each 5S category using these integrated criteria:
+Evaluate each 5S category comprehensively using these detailed criteria:
 
-1. Sort (Seiri):
-- Necessity: Evaluate if only required tools, equipment, and materials are present
-- Organization: Check for excess inventory, unnecessary documents, and proper storage
-- Safety: Assess PPE appropriateness and removal of hazards
+1. Sort (Seiri) - Organization & Necessity:
+- Equipment Essentials: Are only required tools and equipment present?
+- Inventory Management: Is there excess inventory or WIP materials?
+- Document Control: Are documents current and necessary?
+- Space Optimization: Is space used efficiently without clutter?
+- Safety Equipment: Is PPE appropriate and properly maintained?
 
-2. Set in Order (Seiton):
-- Efficiency: Analyze workspace layout, tool accessibility, and flow optimization
-- Visual Management: Check labeling, zoning, and storage systems
-- Space Utilization: Evaluate organization methods and area optimization
+2. Set in Order (Seiton) - Efficiency & Access:
+- Workflow Optimization: Is the layout conducive to efficient work?
+- Visual Organization: Are items clearly labeled and zones marked?
+- Tool Organization: Are tools arranged logically and stored properly?
+- Access Efficiency: Are frequently used items easily accessible?
+- Space Management: Is storage optimized and well-organized?
 
-3. Shine (Seiso):
-- Cleanliness: Assess workspace, equipment, and tool maintenance
-- Maintenance: Review cleaning schedules, waste management, and inspection processes
-- Standards: Evaluate cleaning procedures and responsibility assignment
+3. Shine (Seiso) - Cleanliness & Maintenance:
+- Workplace Cleanliness: Are all areas clean and well-maintained?
+- Equipment Care: Is equipment regularly cleaned and maintained?
+- Cleaning Standards: Are cleaning procedures standardized?
+- Inspection Integration: Are cleaning and inspection combined?
+- Preventive Maintenance: Are maintenance schedules followed?
 
-4. Standardize (Seiketsu):
-- Process Documentation: Check for standardized procedures and visual controls
-- Communication: Assess information sharing and visual management systems
-- Consistency: Review organizational systems and best practices implementation
+4. Standardize (Seiketsu) - Consistency & Control:
+- Visual Controls: Are visual management tools effectively used?
+- Work Instructions: Are procedures clearly documented?
+- Quality Standards: Are quality checks standardized?
+- Communication Systems: Are updates and changes well-communicated?
+- Best Practices: Are improvements standardized across areas?
 
-5. Sustain (Shitsuke):
-- Engagement: Evaluate employee participation and understanding
-- Monitoring: Check audit systems and performance tracking
-- Improvement: Assess training programs and management support
+5. Sustain (Shitsuke) - Culture & Continuous Improvement:
+- Training Programs: Is there evidence of ongoing 5S training?
+- Audit Systems: Are regular audits conducted and documented?
+- Employee Engagement: Is there active participation in 5S?
+- Performance Tracking: Are metrics monitored and displayed?
+- Continuous Improvement: Is there a system for implementing suggestions?
 
-Scoring Scale:
-90-100: Exceptional | 80-89: Strong | 70-79: Good | 60-69: Basic | <60: Needs Improvement
+Scoring Guidelines:
+95-100: Exceptional (World-class implementation)
+85-94: Advanced (Strong system with minor improvements needed)
+75-84: Proficient (Good foundation with some gaps)
+65-74: Developing (Basic implementation with significant opportunities)
+Below 65: Requires immediate attention
 
 For each category, provide:
-1. Evidence-based observations
-2. Key findings (positive and negative)
-3. Prioritized, actionable recommendations
-4. Impact assessment on safety and efficiency
+1. Detailed evidence-based findings
+2. Specific positive observations
+3. Clear areas for improvement
+4. Practical short-term solutions
+5. Strategic long-term recommendations
+6. Impact assessment on:
+   - Safety
+   - Efficiency
+   - Quality
+   - Employee engagement
+   - Cost reduction
 
-Format suggestions with clear sections using \\n\\n breaks.`;
+Format recommendations to clearly distinguish between:
+- Quick wins (implementable within 1 week)
+- Medium-term improvements (1-3 months)
+- Long-term strategic changes (3+ months)
+
+Include specific examples from the images to support your analysis. Format the suggestions section with clear breaks using \\n\\n between major points.`;
 
     const response = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
@@ -76,15 +115,12 @@ Format suggestions with clear sections using \\n\\n breaks.`;
       messages: [{
         role: "user",
         content: [
-          {
-            type: "text",
-            text: prompt
-          },
+          { type: "text", text: prompt },
           ...imageBase64Array.map(base64 => ({
             type: "image",
             source: {
               type: "base64",
-              media_type: "image/jpeg",
+              media_type: "image/jpeg" as const,
               data: base64
             }
           }))
@@ -93,7 +129,7 @@ Format suggestions with clear sections using \\n\\n breaks.`;
     });
 
     // Extract and validate response
-    const responseText = response.content[0].text;
+    const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
     try {
       // Remove any potential markdown formatting
       const jsonStr = responseText.replace(/```json\n?|\n?```/g, '').trim();
