@@ -60,30 +60,20 @@ export async function analyze5SFromImages(imageBase64Array: string[]): Promise<A
 
 Evaluate each 5S category comprehensively using these detailed criteria:
 
-1. Ensure workstations, equipment, and storage are clutter-free, with only necessary items present, including tools, parts, containers, and PPE. Remove unauthorized or outdated documents, trash, scrap, and personal items (except coats during cold weather). Verify that cleaning equipment and supplies are only in the required areas. Ensure floors, aisles, and work surfaces are free of debris. Confirm that inventory and WIP levels are within specified limits and excess parts or containers are not present.
+1. Sort (Seiri) - Organization & Necessity:
+Ensure workstations, equipment, and storage are clutter-free, with only necessary items present, including tools, parts, containers, and PPE. Remove unauthorized or outdated documents, trash, scrap, and personal items (except coats during cold weather). Verify that cleaning equipment and supplies are only in the required areas. Ensure floors, aisles, and work surfaces are free of debris. Confirm that inventory and WIP levels are within specified limits and excess parts or containers are not present.
 
-2. Ensure all equipment, tools, and storage are properly labeled and foot printed, including tables, bins, racks, toolboxes, and part containers. Verify that emergency equipment, including E-stops, first aid, exits, and hazardous materials, are clearly identified and easily accessible. Confirm that documentation, visual aids, and checklists are stored in labeled locations. Check that floors, aisles, and cleaning equipment are footprinted, labeled, and organized. Ensure personal items are in designated areas, and inventory and WIP levels are properly marked with minimum/maximum indicators. Review if all tools, fixtures, and gauges are in their assigned spots and labeled appropriately.
+2. Set in Order (Seiton) - Orderliness & Accessibility:
+Ensure all equipment, tools, and storage are properly labeled and foot printed, including tables, bins, racks, toolboxes, and part containers. Verify that emergency equipment, including E-stops, first aid, exits, and hazardous materials, are clearly identified and easily accessible. Confirm that documentation, visual aids, and checklists are stored in labeled locations. Check that floors, aisles, and cleaning equipment are footprinted, labeled, and organized. Ensure personal items are in designated areas, and inventory and WIP levels are properly marked with minimum/maximum indicators. Review if all tools, fixtures, and gauges are in their assigned spots and labeled appropriately. 
 
 3. Shine (Seiso) - Cleanliness & Maintenance:
-- Workplace Cleanliness: Are all areas clean and well-maintained?
-- Equipment Care: Is equipment regularly cleaned and maintained?
-- Cleaning Standards: Are cleaning procedures standardized?
-- Inspection Integration: Are cleaning and inspection combined?
-- Preventive Maintenance: Are maintenance schedules followed?
+Ensure all workstations, machines, equipment, tooling, and storage areas (including off-line and on-line materials, inventory, and quality defect holding areas) are clean and items are in their designated locations. Verify that PPE, WIP containers, tools, tool boards, and cabinets are organized and maintained properly. Confirm that posted information on performance and communication boards is up-to-date and clearly visible. Ensure pull systems are properly stocked and replenishment procedures are in place. Check that safety and quality controls are documented and displayed visually in relevant areas.
 
 4. Standardize (Seiketsu) - Consistency & Control:
-- Visual Controls: Are visual management tools effectively used?
-- Work Instructions: Are procedures clearly documented?
-- Quality Standards: Are quality checks standardized?
-- Communication Systems: Are updates and changes well-communicated?
-- Best Practices: Are improvements standardized across areas?
+Ensure that systems or devices are in place to prevent work surfaces, stations, sub stations, floors, machines, equipment, furniture, tooling, inventories, WIP areas, tool boards, shelving, cabinets, and personal items from becoming disorganized or dirty. Implement strategies to maintain cleanliness and order in all areas.
 
 5. Sustain (Shitsuke) - Culture & Continuous Improvement:
-- Training Programs: Is there evidence of ongoing 5S training?
-- Audit Systems: Are regular audits conducted and documented?
-- Employee Engagement: Is there active participation in 5S?
-- Performance Tracking: Are metrics monitored and displayed?
-- Continuous Improvement: Is there a system for implementing suggestions?
+Ensure that 5S audits have been completed weekly for three consecutive months. Verify that posted countermeasures have been implemented on time. Check if unnecessary items are easily identifiable at a glance. Confirm that all employees can clearly articulate the 5S objectives for the area (score range: 0 or 0.4) This is a 0 score if none are observed.
 
 Scoring Guidelines:
 95-100: Exceptional (World-class implementation)
