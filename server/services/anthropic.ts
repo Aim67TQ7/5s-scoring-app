@@ -9,72 +9,113 @@ const anthropic = new Anthropic({
 export async function analyze5SFromImages(imageBase64Array: string[]): Promise<Analysis> {
   try {
 
-    const prompt = `Analyze these workplace images using 5S methodology and return a JSON object with the following structure:
+    const prompt = `You are a 5S workplace organization expert. Analyze these workplace images using 5S methodology and return a JSON object with the following structure:
+
 {
-  "overallScore": number,
+  "overallScore": number (0-100),
   "scores": {
-    "sort": number,
-    "setInOrder": number,
-    "shine": number,
-    "standardize": number,
-    "sustain": number
+    "sort": number (0-100),
+    "setInOrder": number (0-100),
+    "shine": number (0-100),
+    "standardize": number (0-100),
+    "sustain": number (0-100)
   },
+  "categoryDetails": {
+    "sort": {
+      "score": number (0-100),
+      "findings": string[],
+      "recommendations": string[]
+    },
+    "setInOrder": {
+      "score": number (0-100),
+      "findings": string[],
+      "recommendations": string[]
+    },
+    "shine": {
+      "score": number (0-100),
+      "findings": string[],
+      "recommendations": string[]
+    },
+    "standardize": {
+      "score": number (0-100),
+      "findings": string[],
+      "recommendations": string[]
+    },
+    "sustain": {
+      "score": number (0-100),
+      "findings": string[],
+      "recommendations": string[]
+    }
+  },
+  "priorityImprovements": [
+    {
+      "category": string,
+      "issue": string,
+      "impact": "high" | "medium" | "low",
+      "recommendation": string,
+      "estimatedEffort": "quick-win" | "medium-term" | "long-term"
+    }
+  ],
   "suggestions": string
 }
 
-For each category, analyze:
+For each 5S category, perform a detailed analysis using these criteria:
 
-Sort (Seiri):
-[(Furniture & Equipment) Are work benches, carts, machines, equipment, cabinets, tool boxes, shelves, fixtures, structures clutter free of unnecessary items?
-(PPE) Are all safety gloves, armguards, safety glasses, ear plugs, aprons, etc. in area necessary?
-(Documents) Are unauthorized/outdated instructions, visual aids, inspection forms, work instructions etc removed from the work area?
-(Floor & Walk Aisles) Are floors & workstation surfaces free of unnecessary hardware, parts, papers, cardboard, metal, pens, debris, trash etc.?
-(Cleaning Equipment) Is all cleaning equipment & supplies such as rags, mops,  mop buckets, brooms, dust pans, cleaning solutions, floor mats etc.in area necessary?
-(Tools, fixtures, gages, hand tools) Are only necessary tools needed to perform the workstation job (tools, fixtures, gauges, air wrenches, hand tools etc.) located in the area?
-(Part Containers) Are only necessary part containers such as colored totes, wire baskets, tote pans, returnable totes or containers located in the area?
-(Personal items) Have personal items such as (lunch boxes, drinks, newspapers, food, magazines) been removed from the immediate working area? NOTE: Coats/Jackets are allowed during cold weather due to doors frequent opening/closing of doors.
-Has all trash, scrap, rework and  their containers been removed from the area?
-(Inventory and Work In Process (WIP) ) Is the area free of excess inventory & parts?  Parts in excess of min/max levels or specified limits.  Have  excess containers or shelves to hold excess inventory?
-Analyze organization and unnecessary items]
+1. Sort (Seiri) - Evaluate the separation of necessary from unnecessary items:
+- Workstation Essentials: Are only required tools, equipment, and materials present?
+- Documentation: Are there outdated or unnecessary documents, manuals, or charts?
+- Inventory Management: Is there excess inventory or WIP beyond immediate needs?
+- Personal Items: Are personal belongings properly stored or removed?
+- Safety Equipment: Is PPE appropriate and necessary for the work area?
+- Storage Solutions: Are storage areas free from obsolete or redundant items?
 
-Set in Order (Seiton):
-[(Furniture & Equipment) Are work benches, carts, machines, equipment, cabinets, tool boxes, shelves, fixtures, structures clutter free of unnecessary items?
-(PPE) Are all safety gloves, armguards, safety glasses, ear plugs, aprons, etc. in area necessary?
-(Documents) Are unauthorized/outdated instructions, visual aids, inspection forms, work instructions etc removed from the work area?
-(Floor & Walk Aisles) Are floors & workstation surfaces free of unnecessary hardware, parts, papers, cardboard, metal, pens, debris, trash etc.?
-(Cleaning Equipment) Is all cleaning equipment & supplies such as rags, mops,  mop buckets, brooms, dust pans, cleaning solutions, floor mats etc.in area necessary?
-(Tools, fixtures, gages, hand tools) Are only necessary tools needed to perform the workstation job (tools, fixtures, gauges, air wrenches, hand tools etc.) located in the area?
-(Part Containers) Are only necessary part containers such as colored totes, wire baskets, tote pans, returnable totes or containers located in the area?
-(Personal items) Have personal items such as (lunch boxes, drinks, newspapers, food, magazines) been removed from the immediate working area? NOTE: Coats/Jackets are allowed during cold weather due to doors frequent opening/closing of doors.
-Has all trash, scrap, rework and  their containers been removed from the area?
-(Inventory and Work In Process (WIP) ) Is the area free of excess inventory & parts?  Parts in excess of min/max levels or specified limits.  Have  excess containers or shelves to hold excess inventory? Analyze layout and item placement]
+2. Set in Order (Seiton) - Analyze the organization and efficiency of item placement:
+- Visual Management: Are items clearly labeled and zones marked?
+- Accessibility: Are frequently used items within easy reach?
+- Flow Optimization: Does the layout support efficient work processes?
+- Storage Systems: Are storage solutions appropriate and well-organized?
+- Tool Organization: Are tools arranged logically and stored properly?
+- Space Utilization: Is space used effectively without overcrowding?
 
-Shine (Seiso):
-[(Work Stations) Are all items on work stations in proper location and are they clean? (Personal Protective Equipment (PPE), WIP containers, tools, floors, desk, carts, fixtures rework areas etc.) 
-(Machines, Equipment & Tooling) Are all equipment, work benches, tuggers, baskets, bins, totes etc. clean and in their designated location?
-(On-line Production Material, Supplies & Parts Storage) Are all on-line production materials, supplies and part containers etc.  clean and in their designated location?
-(Tool Boards) Are all tools etc. in the designated location on the tool boards and all tools & tool boards clean?
-(Off-Line Storage) Are all items on racks, dies, carts fixtures, floors etc. in off-line storage areas clean and in their designated locations?
-(On-Line Cabinets, Shelving) Are cabinets, files clean and in their designated location?
-(Inventory Storage Areas such as staging areas, material holding areas and quality defect holding areas) Are inventory storage areas such as staging areas, material holding areas and quality defect holding areas/items clean and in their designated location?
-(Information) Is all posted information on performance boards, communication boards, clean and in the right location?
-(Pull System) Are all items in super markets/grocery stores in proper place and are their procedures in place to replenish the system?
-(Safety and Quality Related Controls) Have visual aids for appropriate safety and quality concerns been documented visually? Analyze cleanliness and maintenance]
+3. Shine (Seiso) - Assess cleanliness and maintenance:
+- Equipment Condition: Are machines, tools, and equipment clean and well-maintained?
+- Work Area Cleanliness: Are floors, surfaces, and common areas clean?
+- Cleaning Standards: Are cleaning schedules and responsibilities clearly defined?
+- Preventive Maintenance: Are maintenance schedules followed and documented?
+- Waste Management: Are waste disposal systems effective and maintained?
+- Inspection Points: Are regular cleaning inspection points established?
 
-Standardize (Seiketsu):
-[(Work Surfaces, Work Stations, Sub Stations and Floors) Have ideas or devices been installed to prevent work surfaces, work stations, sub stations and floors from becoming unorganized, messy or dirty?  
-(Machines, Equipment, Furniture, Tooling etc.) Have ideas or devices been installed to prevent machines, equipment, furniture, tooling etc. from becoming unorganized, messy or dirty?
-(Inventories & WIP areas) Have ideas or devices been installed to prevent on-line and off-line inventories & WIP areas from becoming unorganized, messy or dirty?  
-(Tool Boards, Shelving & Cabinets) Have ideas or devices been implemented to prevent these areas from becoming unorganized messy or dirty?
-(Personal Items)  Have ideas or devices been implemented to prevent these areas from becoming unorganized messy or dirty? Analyze processes and visual management]
+4. Standardize (Seiketsu) - Review standardization of best practices:
+- Visual Controls: Are visual aids and controls effectively implemented?
+- Standard Procedures: Are work procedures standardized and documented?
+- Workplace Organization: Are organizational systems consistently maintained?
+- Color Coding: Is color coding used effectively for visual management?
+- Communication Systems: Are communication boards up-to-date and organized?
+- Best Practices: Are best practices documented and shared?
 
-Sustain (Shitsuke):
-[Have 5S audits been completed per weekly for 3 straight months?
-Have posted countermeasures been completed on time?
-Visual control - Can all unnecessary items be distinguished at a glance?
-Can all employees clearly articulate the 5S objectives of the area? (0 or .4 possible score) Analyze adherence to standards]
+5. Sustain (Shitsuke) - Evaluate the maintenance of 5S practices:
+- Audit Systems: Are regular 5S audits conducted and documented?
+- Training Programs: Is there evidence of ongoing 5S training?
+- Employee Engagement: Do employees demonstrate understanding and commitment?
+- Continuous Improvement: Are improvement suggestions implemented?
+- Performance Tracking: Are 5S metrics tracked and displayed?
+- Management Support: Is there visible management support for 5S?
 
-Provide specific scores out of 100 for each category. Format suggestions with clear paragraph breaks using \\n\\n between sections.`;
+Scoring Guidelines:
+- 90-100: Exceptional implementation
+- 80-89: Strong implementation with minor improvements needed
+- 70-79: Good implementation with some notable gaps
+- 60-69: Basic implementation with significant improvement opportunities
+- Below 60: Requires immediate attention and major improvements
+
+For each category:
+1. Provide specific observations based on visible evidence
+2. List both positive findings and areas for improvement
+3. Give actionable recommendations
+4. Consider the impact on safety, efficiency, and quality
+5. Prioritize recommendations based on impact and effort required
+
+Format the suggestions with clear structure and paragraph breaks using \\n\\n between sections. Prioritize improvements based on their potential impact on workplace efficiency and safety.`;
 
     const response = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
@@ -107,16 +148,27 @@ Provide specific scores out of 100 for each category. Format suggestions with cl
       const result = JSON.parse(jsonStr);
       
       // Validate response structure
-      if (!result.overallScore || !result.scores || !result.suggestions) {
+      if (!result.overallScore || !result.scores || !result.suggestions || !result.categoryDetails || !result.priorityImprovements) {
         throw new Error('Invalid response format');
       }
       
-      // Validate score structure
+      // Validate score structure and category details
       const requiredScores = ['sort', 'setInOrder', 'shine', 'standardize', 'sustain'];
       for (const score of requiredScores) {
         if (typeof result.scores[score] !== 'number') {
           throw new Error(`Missing or invalid score: ${score}`);
         }
+        if (!result.categoryDetails[score] || 
+            typeof result.categoryDetails[score].score !== 'number' ||
+            !Array.isArray(result.categoryDetails[score].findings) ||
+            !Array.isArray(result.categoryDetails[score].recommendations)) {
+          throw new Error(`Missing or invalid category details for: ${score}`);
+        }
+      }
+      
+      // Validate priority improvements
+      if (!Array.isArray(result.priorityImprovements)) {
+        throw new Error('Priority improvements must be an array');
       }
       
       return {
