@@ -146,7 +146,7 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
                       <ul className="space-y-1">
                         {categoryDetails.recommendations.slice(0, 2).map((rec, idx) => (
                           <li key={idx} className="flex items-start gap-2">
-                            <span className={`inline-block px-2 py-0.5 rounded text-xs ${
+                            <span className={`inline-block px-2 py-0.0 rounded text-xs ${
                               rec.priority === 'high' 
                                 ? 'bg-red-100 text-red-700'
                                 : rec.priority === 'medium'

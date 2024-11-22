@@ -86,9 +86,10 @@ For each category, provide:
 1. Detailed evidence-based findings
 2. Specific positive observations
 3. Clear areas for improvement
-4. Practical short-term solutions
-5. Strategic long-term recommendations
-6. Impact assessment on:
+4. Brainstorm, specific ways for immediate improvement
+5. Suggest changes for short-term solutions
+6. Strategic long-term recommendations
+7. Impact assessment on:
    - Safety
    - Efficiency
    - Quality
@@ -99,6 +100,8 @@ Format recommendations to clearly distinguish between:
 - Quick wins (implementable within 1 week)
 - Medium-term improvements (1-3 months)
 - Long-term strategic changes (3+ months)
+
+None of the information in this report is to be regarded as a substitute for a regulatory or safety audit.`;
 
 Include specific examples from the images to support your analysis. Format the suggestions section with clear breaks using \\n\\n between major points.`;
 
