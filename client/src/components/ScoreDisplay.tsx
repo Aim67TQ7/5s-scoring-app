@@ -11,10 +11,8 @@ interface ScoreDisplayProps {
 
 export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
   const getScoreColor = (score: number) => {
-    if (score >= 95) return "bg-green-500";
-    if (score >= 85) return "bg-green-400";
-    if (score >= 75) return "bg-yellow-500";
-    if (score >= 65) return "bg-yellow-600";
+    if (score >= 90) return "bg-green-500";
+    if (score >= 70) return "bg-yellow-500";
     return "bg-red-500";
   };
 
@@ -81,90 +79,22 @@ export function ScoreDisplay({ analysis }: ScoreDisplayProps) {
           </div>
         </div>
 
-        {/* Scoring Guide */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-          <h3 className="font-semibold mb-2">Score Interpretation Guide</h3>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span>95-100: Exceptional</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-400" />
-              <span>85-94: Advanced</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <span>75-84: Proficient</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-600" />
-              <span>65-74: Developing</span>
-            </div>
-            <div className="flex items-center gap-2 col-span-2">
-              <div className="w-3 h-3 rounded-full bg-red-500" />
-              <span>Below 65: Requires Attention</span>
-            </div>
-          </div>
-        </div>
         {/* Category Scores */}
         <div className="space-y-2">
-          {Object.entries(analysis.scores).map(([key, score]) => {
-            const categoryDetails = analysis.categories[key];
-            return (
-              <div key={key} className="border-b pb-3 space-y-2">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-md font-semibold capitalize">
-                    {key === 'setInOrder' ? 'Set in Order' : key}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{score.toFixed(1)}%</span>
-                    <div className={`w-3 h-3 rounded-full ${getScoreColor(score)}`} />
-                  </div>
-                </div>
-                <Progress
-                  value={score}
-                  className={`${getScoreColor(score)} h-2`}
-                />
-                <div className="mt-2 space-y-2 text-sm">
-                  {/* Key Findings */}
-                  {categoryDetails.findings.length > 0 && (
-                    <div>
-                      <h4 className="font-medium text-gray-700">Key Findings:</h4>
-                      <ul className="list-disc pl-4 text-gray-600 space-y-1">
-                        {categoryDetails.findings.slice(0, 3).map((finding, idx) => (
-                          <li key={idx}>{finding}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {/* Recommendations */}
-                  {categoryDetails.recommendations.length > 0 && (
-                    <div>
-                      <h4 className="font-medium text-gray-700">Top Recommendations:</h4>
-                      <ul className="space-y-1">
-                        {categoryDetails.recommendations.slice(0, 2).map((rec, idx) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <span className={`inline-block px-2 py-0.0 rounded text-xs ${
-                              rec.priority === 'high' 
-                                ? 'bg-red-100 text-red-700'
-                                : rec.priority === 'medium'
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-green-100 text-green-700'
-                            }`}>
-                              {rec.priority}
-                            </span>
-                            <span className="text-gray-600 flex-1">{rec.description}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
+          {Object.entries(analysis.scores).map(([key, score]) => (
+            <div key={key} className="border-b pb-1">
+              <div className="flex justify-between items-center">
+                <h3 className="text-md font-semibold capitalize">
+                  {key === 'setInOrder' ? 'Set in Order' : key}
+                </h3>
+                <span className="text-sm font-medium">{score.toFixed(1)}%</span>
               </div>
-            );
-          })}
+              <Progress
+                value={score}
+                className={`${getScoreColor(score)} h-2 mt-1`}
+              />
+            </div>
+          ))}
         </div>
 
         {/* Suggestions */}

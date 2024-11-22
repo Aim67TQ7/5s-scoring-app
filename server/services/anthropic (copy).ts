@@ -127,21 +127,21 @@ Include specific examples from the images to support your analysis. Format the s
 
     // Extract and validate response
     const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
-    
+
     // Log full response for debugging
     console.log('Raw Anthropic response:', responseText);
-    
+
     try {
       // Remove any potential markdown formatting
       const jsonStr = responseText.replace(/```json\n?|\n?```/g, '').trim();
       const result = JSON.parse(jsonStr);
-      
+
       // Validate response structure
       if (!result.overallScore || !result.scores || !result.suggestions || !result.categories) {
         console.error('Invalid response structure:', result);
         throw new Error('Invalid response format - missing required fields');
       }
-      
+
       // Validate score structure and categories
       const requiredScores = ['sort', 'setInOrder', 'shine', 'standardize', 'sustain'];
       for (const score of requiredScores) {
@@ -156,7 +156,7 @@ Include specific examples from the images to support your analysis. Format the s
           throw new Error(`Missing or invalid category details for: ${score}`);
         }
       }
-      
+
       return {
         ...result,
         location: '',
