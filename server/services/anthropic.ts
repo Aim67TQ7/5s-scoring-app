@@ -6,31 +6,10 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-// Helper function for exponential backoff retry
-async function retryWithExponentialBackoff<T>(
-  operation: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 1000
-): Promise<T> {
-  let lastError: Error | null = null;
-
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      return await operation();
-    } catch (error) {
-      lastError = error as Error;
-      const delay = baseDelay * Math.pow(2, attempt);
-      console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
-
-  throw lastError || new Error('Operation failed after maximum retries');
-}
-
 export async function analyze5SFromImages(imageBase64Array: string[]): Promise<Analysis> {
   try {
-    const prompt = `As a 5S workplace organization expert, analyze these workplace images and provide a detailed assessment in this JSON format:
+
+    const prompt = `You are a 5S workplace organization expert. Analyze these workplace images using 5S methodology and return a JSON object with the following structure:
 
 {
   "overallScore": number (0-100),
@@ -41,130 +20,155 @@ export async function analyze5SFromImages(imageBase64Array: string[]): Promise<A
     "standardize": number (0-100),
     "sustain": number (0-100)
   },
-  "categories": {
+  "categoryDetails": {
     "sort": {
+      "score": number (0-100),
       "findings": string[],
-      "recommendations": [{
-        "description": string,
-        "timeframe": "immediate"|"short-term"|"long-term",
-        "priority": "high"|"medium"|"low"
-      }]
+      "recommendations": string[]
     },
-    "setInOrder": {/* same structure */},
-    "shine": {/* same structure */},
-    "standardize": {/* same structure */},
-    "sustain": {/* same structure */}
+    "setInOrder": {
+      "score": number (0-100),
+      "findings": string[],
+      "recommendations": string[]
+    },
+    "shine": {
+      "score": number (0-100),
+      "findings": string[],
+      "recommendations": string[]
+    },
+    "standardize": {
+      "score": number (0-100),
+      "findings": string[],
+      "recommendations": string[]
+    },
+    "sustain": {
+      "score": number (0-100),
+      "findings": string[],
+      "recommendations": string[]
+    }
   },
+  "priorityImprovements": [
+    {
+      "category": string,
+      "issue": string,
+      "impact": "high" | "medium" | "low",
+      "recommendation": string,
+      "estimatedEffort": "quick-win" | "medium-term" | "long-term"
+    }
+  ],
   "suggestions": string
 }
 
-Evaluate each 5S category comprehensively using these detailed criteria:
+For each 5S category, perform a detailed analysis using these criteria:
 
-1. Ensure workstations, equipment, and storage are clutter-free, with only necessary items present, including tools, parts, containers, and PPE. Remove unauthorized or outdated documents, trash, scrap, and personal items (except coats during cold weather). Verify that cleaning equipment and supplies are only in the required areas. Ensure floors, aisles, and work surfaces are free of debris. Confirm that inventory and WIP levels are within specified limits and excess parts or containers are not present.
+1. Sort (Seiri) - Evaluate the separation of necessary from unnecessary items:
+- Workstation Essentials: Are only required tools, equipment, and materials present?
+- Documentation: Are there outdated or unnecessary documents, manuals, or charts?
+- Inventory Management: Is there excess inventory or WIP beyond immediate needs?
+- Personal Items: Are personal belongings properly stored or removed?
+- Safety Equipment: Is PPE appropriate and necessary for the work area?
+- Storage Solutions: Are storage areas free from obsolete or redundant items?
 
-2. Ensure all equipment, tools, and storage are properly labeled and foot printed, including tables, bins, racks, toolboxes, and part containers. Verify that emergency equipment, including E-stops, first aid, exits, and hazardous materials, are clearly identified and easily accessible. Confirm that documentation, visual aids, and checklists are stored in labeled locations. Check that floors, aisles, and cleaning equipment are footprinted, labeled, and organized. Ensure personal items are in designated areas, and inventory and WIP levels are properly marked with minimum/maximum indicators. Review if all tools, fixtures, and gauges are in their assigned spots and labeled appropriately.
+2. Set in Order (Seiton) - Analyze the organization and efficiency of item placement:
+- Visual Management: Are items clearly labeled and zones marked?
+- Accessibility: Are frequently used items within easy reach?
+- Flow Optimization: Does the layout support efficient work processes?
+- Storage Systems: Are storage solutions appropriate and well-organized?
+- Tool Organization: Are tools arranged logically and stored properly?
+- Space Utilization: Is space used effectively without overcrowding?
 
-3. Shine (Seiso) - Cleanliness & Maintenance:
-- Workplace Cleanliness: Are all areas clean and well-maintained?
-- Equipment Care: Is equipment regularly cleaned and maintained?
-- Cleaning Standards: Are cleaning procedures standardized?
-- Inspection Integration: Are cleaning and inspection combined?
-- Preventive Maintenance: Are maintenance schedules followed?
+3. Shine (Seiso) - Assess cleanliness and maintenance:
+- Equipment Condition: Are machines, tools, and equipment clean and well-maintained?
+- Work Area Cleanliness: Are floors, surfaces, and common areas clean?
+- Cleaning Standards: Are cleaning schedules and responsibilities clearly defined?
+- Preventive Maintenance: Are maintenance schedules followed and documented?
+- Waste Management: Are waste disposal systems effective and maintained?
+- Inspection Points: Are regular cleaning inspection points established?
 
-4. Standardize (Seiketsu) - Consistency & Control:
-- Visual Controls: Are visual management tools effectively used?
-- Work Instructions: Are procedures clearly documented?
-- Quality Standards: Are quality checks standardized?
-- Communication Systems: Are updates and changes well-communicated?
-- Best Practices: Are improvements standardized across areas?
+4. Standardize (Seiketsu) - Review standardization of best practices:
+- Visual Controls: Are visual aids and controls effectively implemented?
+- Standard Procedures: Are work procedures standardized and documented?
+- Workplace Organization: Are organizational systems consistently maintained?
+- Color Coding: Is color coding used effectively for visual management?
+- Communication Systems: Are communication boards up-to-date and organized?
+- Best Practices: Are best practices documented and shared?
 
-5. Sustain (Shitsuke) - Culture & Continuous Improvement:
+5. Sustain (Shitsuke) - Evaluate the maintenance of 5S practices:
+- Audit Systems: Are regular 5S audits conducted and documented?
 - Training Programs: Is there evidence of ongoing 5S training?
-- Audit Systems: Are regular audits conducted and documented?
-- Employee Engagement: Is there active participation in 5S?
-- Performance Tracking: Are metrics monitored and displayed?
-- Continuous Improvement: Is there a system for implementing suggestions?
+- Employee Engagement: Do employees demonstrate understanding and commitment?
+- Continuous Improvement: Are improvement suggestions implemented?
+- Performance Tracking: Are 5S metrics tracked and displayed?
+- Management Support: Is there visible management support for 5S?
 
 Scoring Guidelines:
-95-100: Exceptional (World-class implementation)
-85-94: Advanced (Strong system with minor improvements needed)
-75-84: Proficient (Good foundation with some gaps)
-65-74: Developing (Basic implementation with significant opportunities)
-Below 65: Requires immediate attention
+- 90-100: Exceptional implementation
+- 80-89: Strong implementation with minor improvements needed
+- 70-79: Good implementation with some notable gaps
+- 60-69: Basic implementation with significant improvement opportunities
+- Below 60: Requires immediate attention and major improvements
 
-For each category, provide:
-1. Detailed evidence-based findings
-2. Specific positive observations
-3. Clear areas for improvement
-4. Practical short-term solutions
-5. Strategic long-term recommendations
-6. Impact assessment on:
-   - Safety
-   - Efficiency
-   - Quality
-   - Employee engagement
-   - Cost reduction
+For each category:
+1. Provide specific observations based on visible evidence
+2. List both positive findings and areas for improvement
+3. Give actionable recommendations
+4. Consider the impact on safety, efficiency, and quality
+5. Prioritize recommendations based on impact and effort required
 
-Format recommendations to clearly distinguish between:
-- Quick wins (implementable within 1 week)
-- Medium-term improvements (1-3 months)
-- Long-term strategic changes (3+ months)
+Format the suggestions with clear structure and paragraph breaks using \\n\\n between sections. Prioritize improvements based on their potential impact on workplace efficiency and safety.`;
 
-Include specific examples from the images to support your analysis. Format the suggestions section with clear breaks using \\n\\n between major points.`;
-
-    const response = await retryWithExponentialBackoff(async () => {
-      const result = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 4096,
-        temperature: 0.3, // Lower temperature for more consistent JSON formatting
-        messages: [{
+    const response = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 1024,
+      temperature: 0.7,
+      messages: [{
         role: "user",
         content: [
-          { type: "text", text: prompt },
+          {
+            type: "text",
+            text: prompt
+          },
           ...imageBase64Array.map(base64 => ({
             type: "image",
             source: {
               type: "base64",
-              media_type: "image/jpeg" as const,
+              media_type: "image/jpeg",
               data: base64
             }
           }))
         ]
       }]
     });
-      return result;
-    });
 
     // Extract and validate response
-    const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
-    
-    // Log full response for debugging
-    console.log('Raw Anthropic response:', responseText);
-    
+    const responseText = response.content[0].text;
     try {
       // Remove any potential markdown formatting
       const jsonStr = responseText.replace(/```json\n?|\n?```/g, '').trim();
       const result = JSON.parse(jsonStr);
       
       // Validate response structure
-      if (!result.overallScore || !result.scores || !result.suggestions || !result.categories) {
-        console.error('Invalid response structure:', result);
-        throw new Error('Invalid response format - missing required fields');
+      if (!result.overallScore || !result.scores || !result.suggestions || !result.categoryDetails || !result.priorityImprovements) {
+        throw new Error('Invalid response format');
       }
       
-      // Validate score structure and categories
+      // Validate score structure and category details
       const requiredScores = ['sort', 'setInOrder', 'shine', 'standardize', 'sustain'];
       for (const score of requiredScores) {
         if (typeof result.scores[score] !== 'number') {
-          console.error(`Invalid score for ${score}:`, result.scores[score]);
           throw new Error(`Missing or invalid score: ${score}`);
         }
-        if (!result.categories[score] || 
-            !Array.isArray(result.categories[score].findings) ||
-            !Array.isArray(result.categories[score].recommendations)) {
-          console.error(`Invalid category details for ${score}:`, result.categories[score]);
+        if (!result.categoryDetails[score] || 
+            typeof result.categoryDetails[score].score !== 'number' ||
+            !Array.isArray(result.categoryDetails[score].findings) ||
+            !Array.isArray(result.categoryDetails[score].recommendations)) {
           throw new Error(`Missing or invalid category details for: ${score}`);
         }
+      }
+      
+      // Validate priority improvements
+      if (!Array.isArray(result.priorityImprovements)) {
+        throw new Error('Priority improvements must be an array');
       }
       
       return {
